@@ -19,7 +19,6 @@ def plot_data(channels):
         ax.set_ylabel('C ' + str(i + 1))
         ax.set_yticks([])
         i += 1
-
     plt.show()
 
 
@@ -61,14 +60,10 @@ def notch(channels):
 if __name__ == '__main__':
     reader = EEGReader(sys.argv[1])
     data = reader.channels
-
-    for flag in sys.argv[1:]:
-        if flag == '-b':
-            data = bandpass(data)
-            continue
-        if flag == '-n':
-            data = notch(data)
-            continue
-        if flag == '-p':
-            plot_data(data)
+    if sys.argv.__contains__('-b'):
+        data = bandpass(data)
+    if sys.argv.__contains__('-n'):
+        data = notch(data)
+    if sys.argv.__contains__('-p'):
+        plot_data(data)
 
