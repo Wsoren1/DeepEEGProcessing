@@ -5,7 +5,7 @@ import shutil
 from random import randrange
 
 
-def write_to_file(source, target_dir, desired_samples, percent_val):
+def write_to_file(source, target_dir, desired_samples, percent_val, class_name):
     with open(source, 'r') as f:
         rows = [line for line in f]
     size = len(rows) - 6
@@ -19,13 +19,21 @@ def write_to_file(source, target_dir, desired_samples, percent_val):
         sample += [rows[int(i*step+6):int(step+i*step)]]
         samples += [sample]
 
+    if not os.path.exists(target_dir + "\\validation"):
+        os.makedirs(target_dir + "\\validation\\")
+        os.makedirs(target_dir + "\\train\\")
+
+    if not os.path.exists(target_dir + "\\validation\\" + class_name):
+        os.makedirs(target_dir + "\\validation\\" + class_name)
+        os.makedirs(target_dir + "\\train\\" + class_name)
+
     for sample_number in range(desired_samples):
         with open(target_dir + '\\' + str(sample_number), 'w') as f:
             for row in samples[sample_number]:
                 f.writelines(row)
 
-    os.makedirs(target_dir + "\\validation")
-    os.makedirs(target_dir + "\\train")
+    val_last_num = len(os.listdir(target_dir + "\\validation\\" + class_name))
+    train_last_num = len(os.listdir(target_dir + "\\train\\" + class_name))
 
     i = 0
     dirs = os.listdir(target_dir)[:-2]
@@ -34,10 +42,11 @@ def write_to_file(source, target_dir, desired_samples, percent_val):
 
         if i < desired_samples * percent_val:
             shutil.move(target_dir + '\\' + file,
-                        target_dir + "\\validation\\" + str(i))
+                        target_dir + "\\validation\\" + class_name + "\\" + str(i + val_last_num))
         else:
             shutil.move(target_dir + '\\' + file,
-                        target_dir + "\\train\\" + str(int(i - desired_samples * percent_val)))
+                        target_dir + "\\train\\" + class_name + "\\" +
+                        str(int(i - desired_samples * percent_val + train_last_num)))
 
         i += 1
         dirs = os.listdir(target_dir)[:-2]
@@ -46,12 +55,12 @@ def write_to_file(source, target_dir, desired_samples, percent_val):
 if __name__ == '__main__':
     source_file = sys.argv[1]
     target_dir = sys.argv[2]
-    n_samples = int(sys.argv[3])
-    percent_val = float(sys.argv[4])
+    class_name = sys.argv[3]
+    n_samples = int(sys.argv[4])
+    percent_val = float(sys.argv[5])
 
     if n_samples * percent_val - int(n_samples * percent_val) != 0:
         raise Exception("n_samples * percent_val != int()")
-    if os.listdir(target_dir) != []:
-        raise Exception("Target directory not empty")
 
-    write_to_file(source_file, target_dir, n_samples, percent_val)
+
+    write_to_file(source_file, target_dir, n_samples, percent_val, class_name)
