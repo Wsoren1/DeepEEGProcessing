@@ -14,7 +14,7 @@ while True:
     if input("[y/n] Add_another_class? : ").lower() == 'n':
         break
 
-n_samples = int(input('n_samples  : '))
+n_samples = float(input('sample_len  : '))
 percent_val = int(input('percent_val: ')) / 100
 
 for i in range(len(source_dirs)):

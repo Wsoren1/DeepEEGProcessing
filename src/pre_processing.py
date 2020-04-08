@@ -3,20 +3,28 @@ import sys
 import os
 import shutil
 from random import randrange
+from datetime import datetime
 
 
-def write_to_file(source, target_dir, desired_samples, percent_val, class_name):
+def write_to_file(source, target_dir, desired_sample_length, percent_val, class_name):
     with open(source, 'r') as f:
         rows = [line for line in f]
     size = len(rows) - 6
-    step = size/desired_samples
     headers = rows[:6]
+    total_seconds = (datetime.strptime(rows[-2].split(',')[12], " %H:%M:%S.%f") -
+                     datetime.strptime(rows[7].split(',')[12], " %H:%M:%S.%f")).total_seconds()
+
+    if sample_length > total_seconds:
+        raise Exception("sample_length larger than length of file: " + source)
+
+    desired_samples = int(total_seconds / desired_sample_length)
+    step = size / desired_samples
 
     samples = []
     for i in range(desired_samples):
         sample = []
         sample += [row for row in headers]
-        sample += [rows[int(i*step+6):int(step+i*step)]]
+        sample += [rows[int(i * step + 6):int(step + i * step)]]
         samples += [sample]
 
     if not os.path.exists(target_dir + "\\validation"):
@@ -56,11 +64,7 @@ if __name__ == '__main__':
     source_file = sys.argv[1]
     target_dir = sys.argv[2]
     class_name = sys.argv[3]
-    n_samples = int(sys.argv[4])
+    sample_length = float(sys.argv[4])
     percent_val = float(sys.argv[5])
 
-    if n_samples * percent_val - int(n_samples * percent_val) != 0:
-        raise Exception("n_samples * percent_val != int()")
-
-
-    write_to_file(source_file, target_dir, n_samples, percent_val, class_name)
+    write_to_file(source_file, target_dir, sample_length, percent_val, class_name)
