@@ -1,3 +1,4 @@
+# Author: Walker Sorensen
 import sys
 import os
 import shutil
